@@ -2,15 +2,14 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type Post struct {
-	Id   int
-	Name string
-	Text string
+	Code    string `json:"code"`
+	Name    string `json:"name"`
+	Capital string `json:"capital"`
 }
 
 //check error
@@ -28,22 +27,32 @@ func PingDB(db *sql.DB) {
 
 //make conection
 func initdb() *sql.DB {
-	db, e := sql.Open("mysql", "test:PassworD12312312?@/go_simple")
+	db, e := sql.Open("mysql", "test:PassworD12312312?@tcp(127.0.0.1:3306)/world_x")
 	ErrorCheck(e)
 	return db
 }
 
-func Read() {
+func Read() Post {
 	db := initdb()
 
-	rows, e := db.Query("select * from something")
+	rows, e := db.Query(`
+			SELECT
+			  country.code,
+			  country.Name as name,
+			  city.Name as capital
+			from
+			  country
+			  left join city on city.id = country.Capital
+			where
+			  code like '%IDN%'
+	`)
 	ErrorCheck(e)
 
 	var post = Post{}
 
 	for rows.Next() {
-		e = rows.Scan(&post.Id, &post.Name, &post.Text)
+		e = rows.Scan(&post.Code, &post.Name, &post.Capital)
 		ErrorCheck(e)
-		fmt.Println(post)
 	}
+	return post
 }
