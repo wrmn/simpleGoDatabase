@@ -9,8 +9,8 @@ import (
 )
 
 type Response struct {
-	Code     int             `json:"status"`
-	Response []database.Post `json:"response"`
+	Code     int                `json:"status"`
+	Response []database.Country `json:"response"`
 }
 
 func homePage(w http.ResponseWriter, r *http.Request) {

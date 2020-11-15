@@ -6,33 +6,34 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type Post struct {
+type Country struct {
 	Code    string `json:"code"`
 	Name    string `json:"name"`
 	Capital string `json:"capital"`
 }
 
 //check error
-func ErrorCheck(err error) {
+func errorCheck(err error) {
 	if err != nil {
 		panic(err.Error())
 	}
 }
 
 //check db conection
-func PingDB(db *sql.DB) {
+func pingDB(db *sql.DB) {
 	err := db.Ping()
-	ErrorCheck(err)
+	errorCheck(err)
 }
 
 //make conection
 func initdb() *sql.DB {
 	db, e := sql.Open("mysql", "test:PassworD12312312?@tcp(127.0.0.1:3306)/world_x")
-	ErrorCheck(e)
+	errorCheck(e)
 	return db
 }
 
-func Read() []Post {
+//
+func Read() []Country {
 	db := initdb()
 
 	rows, e := db.Query(`
@@ -48,15 +49,15 @@ func Read() []Post {
 			and
 				city.name is not null
 	`)
-	ErrorCheck(e)
+	errorCheck(e)
 
-	var post = Post{}
-	var result []Post
+	var country = Country{}
+	var result []Country
 
 	for rows.Next() {
-		e = rows.Scan(&post.Code, &post.Name, &post.Capital)
-		ErrorCheck(e)
-		result = append(result, post)
+		e = rows.Scan(&country.Code, &country.Name, &country.Capital)
+		errorCheck(e)
+		result = append(result, country)
 	}
 	return result
 }

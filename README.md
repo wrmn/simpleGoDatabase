@@ -1,29 +1,10 @@
-# simpleGoDatabase
-is a commandline based for CRUD mysql database.
-
-written in go
-
-## How To Use
-```bash
-Usage: crud [global options]
-
-Global options:
-        -h, --help   show this menu
-            --test   run action
-        -r, --read   Read data from table (default: true)
-        -u, --update Update data from table
-        -d, --delete Delete data from table
-```
-## ToDo
-- Database connection (v)
-- Menu & Help (v)
-- Read data with select (v)
-- Insert Data to table ()
-- Update Data from table ()
-- delete data from table ()
-- import data from json ()
-- export data to json ()
+ simpleGoDatabase
+Simplerest API server with database [xworld](https://downloads.mysql.com/docs/world_x-db.zip)
 
 
-## License
-[MIT](https://choosealicense.com/licenses/mit/)
+### Currently WIP, no features available
+
+## ToDos
+- country (insert update delete read)
+- city (insert update delete read)
+- language (insert update delete read)
