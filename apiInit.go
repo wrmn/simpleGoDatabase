@@ -21,7 +21,7 @@ type Country struct {
 	Language []Language `json:"language"`
 }
 
-var Countries database.Post
+var Countries []database.Post
 var Languages []Language
 
 func homePage(w http.ResponseWriter, r *http.Request) {

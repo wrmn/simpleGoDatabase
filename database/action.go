@@ -32,27 +32,31 @@ func initdb() *sql.DB {
 	return db
 }
 
-func Read() Post {
+func Read() []Post {
 	db := initdb()
 
 	rows, e := db.Query(`
 			SELECT
-			  country.code,
-			  country.Name as name,
-			  city.Name as capital
+				country.code,
+				country.Name as name,
+				city.Name as capital
 			from
-			  country
-			  left join city on city.id = country.Capital
+				country
+				left join city on city.id = country.Capital
 			where
-			  code like '%IDN%'
+				country.name is not null
+			and
+				city.name is not null
 	`)
 	ErrorCheck(e)
 
 	var post = Post{}
+	var result []Post
 
 	for rows.Next() {
 		e = rows.Scan(&post.Code, &post.Name, &post.Capital)
 		ErrorCheck(e)
+		result = append(result, post)
 	}
-	return post
+	return result
 }
