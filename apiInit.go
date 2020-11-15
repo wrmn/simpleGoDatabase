@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	database "local/simpleGoDatabase/database"
+	"local/simpleGoDatabase/database"
 	"log"
 	"net/http"
 )
