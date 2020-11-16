@@ -1,57 +1,10 @@
-package database
+package databaseConnection
 
 import (
 	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
 )
-
-type Country struct {
-	Code             string     `json:"code"`
-	Name             string     `json:"name"`
-	Capital          string     `json:"capital"`
-	OfficialLanguage string     `json:"officialLanguage"`
-	Cities           []City     `json:"cities"`
-	Languages        []Language `json:"languages"`
-}
-
-type City struct {
-	Id       string `json:"id"`
-	Name     string `json:"name"`
-	District string `json:"dsitrict"`
-}
-
-type Language struct {
-	Language   string  `json:"language"`
-	IsOfficial bool    `json:"isOfficial"`
-	Percentage float32 `json:"percentage"`
-}
-
-var (
-	country  = Country{}
-	city     = City{}
-	language = Language{}
-)
-
-// check error
-func errorCheck(err error) {
-	if err != nil {
-		panic(err.Error())
-	}
-}
-
-// check db conection
-func pingDB(db *sql.DB) {
-	err := db.Ping()
-	errorCheck(err)
-}
-
-// make conection
-func initdb() *sql.DB {
-	db, e := sql.Open("mysql", "test:PassworD12312312?@tcp(127.0.0.1:3306)/world_x")
-	errorCheck(e)
-	return db
-}
 
 func ReadCountryLanguages(code string, db *sql.DB) []Language {
 	languages := []Language{}
@@ -96,7 +49,6 @@ func ReadCountryCities(code string, db *sql.DB) []City {
 	}
 
 	return cities
-
 }
 
 // read data country
@@ -124,9 +76,12 @@ func ReadCountries() []Country {
 	for rowsCountry.Next() {
 		e = rowsCountry.Scan(&country.Code, &country.Name, &country.Capital, &country.OfficialLanguage)
 		errorCheck(e)
+
 		country.Cities = ReadCountryCities(country.Code, db)
 		country.Languages = ReadCountryLanguages(country.Code, db)
+
 		result = append(result, country)
 	}
+
 	return result
 }

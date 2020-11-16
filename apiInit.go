@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"local/simpleGoDatabase/database"
 	"log"
 	"net/http"
+	database "simpleGoDatabase/databaseConnection"
 )
 
 type ResponseCountry struct {
