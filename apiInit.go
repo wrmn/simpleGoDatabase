@@ -1,21 +1,23 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	database "simpleGoDatabase/databaseConnection"
+	dbCon "simpleGoDatabase/databaseConnection"
 )
 
 type ResponseCountry struct {
-	Code     int                `json:"status"`
-	Response []database.Country `json:"response"`
+	Code     int             `json:"status"`
+	Response []dbCon.Country `json:"response"`
 }
 
 var (
-	statusCode int
-	response   []database.Country
+	statusCode   int
+	response     []dbCon.Country
+	dbConnection *sql.DB
 )
 
 func homePage(w http.ResponseWriter, r *http.Request) {
@@ -24,6 +26,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRequests() {
+	dbConnection = dbCon.Initdb()
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/countries", countries)
 
@@ -52,7 +55,7 @@ func countries(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(statusCode)
 
-	Countries := database.ReadCountries()
+	Countries := dbCon.ReadCountries(dbConnection)
 
 	response := ResponseCountry{
 		Code:     statusCode,
