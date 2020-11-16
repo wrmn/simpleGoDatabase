@@ -35,6 +35,7 @@ func main() {
 	files = append(files, File{ID: "3", Name: "test3.txt"})
 	files = append(files, File{ID: "4", Name: "test4.txt"})
 	files = append(files, File{ID: "5", Name: "test5.txt"})
+	files = append(files, File{ID: "6", Name: "test6.txt"})
 
 	// Route Handlers or Endpoint
 	r.HandleFunc("/api/files", getFiles).Methods("GET")
