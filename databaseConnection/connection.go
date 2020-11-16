@@ -10,9 +10,9 @@ func errorCheck(err error) {
 }
 
 // check db conection
-func pingDB(db *sql.DB) {
+func PingDB(db *sql.DB) error {
 	err := db.Ping()
-	errorCheck(err)
+	return err
 }
 
 // make conection

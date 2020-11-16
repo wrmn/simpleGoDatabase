@@ -11,12 +11,12 @@ import (
 
 type ResponseCountry struct {
 	Code     int             `json:"status"`
+	Message  string          `json:"message"`
 	Response []dbCon.Country `json:"response"`
 }
 
 var (
 	statusCode   int
-	response     []dbCon.Country
 	dbConnection *sql.DB
 )
 
@@ -51,18 +51,29 @@ func status(method string) int {
 func countries(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	statusCode = status(r.Method)
+	response := ResponseCountry{}
+	err := dbCon.PingDB(dbConnection)
 
-	w.WriteHeader(statusCode)
+	if err != nil {
+		fmt.Println("DB connection disconnected")
+		response = ResponseCountry{
+			Code:    500,
+			Message: "Database Disconnect, Contact your network administrator",
+		}
+	} else {
+		statusCode = status(r.Method)
 
-	Countries := dbCon.ReadCountries(dbConnection)
+		w.WriteHeader(statusCode)
 
-	response := ResponseCountry{
-		Code:     statusCode,
-		Response: Countries,
+		Countries := dbCon.ReadCountries(dbConnection)
+
+		response = ResponseCountry{
+			Code:     statusCode,
+			Response: Countries,
+		}
+
+		fmt.Println("Endpoint Hit: Countries")
 	}
-
-	fmt.Println("Endpoint Hit: Countries")
 
 	json.NewEncoder(w).Encode(response)
 }
