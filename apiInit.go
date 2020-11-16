@@ -15,6 +15,18 @@ type ResponseCountry struct {
 	Response []dbCon.Country `json:"response"`
 }
 
+type ResponseCity struct {
+	Code     int          `json:"status"`
+	Message  string       `json:"message"`
+	Response []dbCon.City `json:"response"`
+}
+
+type ResponseLanguage struct {
+	Code     int              `json:"status"`
+	Message  string           `json:"message"`
+	Response []dbCon.Language `json:"response"`
+}
+
 var (
 	statusCode   int
 	dbConnection *sql.DB
@@ -29,6 +41,8 @@ func handleRequests() {
 	dbConnection = dbCon.Initdb()
 	http.HandleFunc("/", homePage)
 	http.HandleFunc("/countries", countries)
+	http.HandleFunc("/cities", cities)
+	http.HandleFunc("/languages", languages)
 
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
@@ -48,18 +62,21 @@ func status(method string) int {
 	}
 }
 
+func errHandle(err error) string {
+	fmt.Println("DB disconnect")
+	fmt.Print(err)
+	return "Database Disconnect, Contact your network administrator"
+}
+
 func countries(w http.ResponseWriter, r *http.Request) {
+	response := ResponseCountry{}
 	w.Header().Set("Content-Type", "application/json")
 
-	response := ResponseCountry{}
 	err := dbCon.PingDB(dbConnection)
 
 	if err != nil {
-		fmt.Println("DB connection disconnected")
-		response = ResponseCountry{
-			Code:    500,
-			Message: "Database Disconnect, Contact your network administrator",
-		}
+		response.Code = 500
+		response.Message = errHandle(err)
 	} else {
 		statusCode = status(r.Method)
 
@@ -69,10 +86,65 @@ func countries(w http.ResponseWriter, r *http.Request) {
 
 		response = ResponseCountry{
 			Code:     statusCode,
+			Message:  "Success",
 			Response: Countries,
 		}
 
 		fmt.Println("Endpoint Hit: Countries")
+	}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func cities(w http.ResponseWriter, r *http.Request) {
+	response := ResponseCity{}
+	w.Header().Set("Content-Type", "application/json")
+
+	err := dbCon.PingDB(dbConnection)
+
+	if err != nil {
+		response.Code = 500
+		response.Message = errHandle(err)
+	} else {
+		statusCode = status(r.Method)
+
+		w.WriteHeader(statusCode)
+
+		Cities := dbCon.ReadCities(dbConnection)
+
+		response = ResponseCity{
+			Code:     statusCode,
+			Message:  "Success",
+			Response: Cities,
+		}
+		fmt.Println("Endpoint hit: Cities")
+	}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func languages(w http.ResponseWriter, r *http.Request) {
+	response := ResponseLanguage{}
+	w.Header().Set("Content-Type", "application/json")
+
+	err := dbCon.PingDB(dbConnection)
+
+	if err != nil {
+		response.Code = 500
+		response.Message = errHandle(err)
+	} else {
+		statusCode = status(r.Method)
+
+		w.WriteHeader(statusCode)
+
+		Languages := dbCon.ReadLanguages(dbConnection)
+
+		response = ResponseLanguage{
+			Code:     statusCode,
+			Message:  "Success",
+			Response: Languages,
+		}
+		fmt.Println("Endpoint hit: Languages")
 	}
 
 	json.NewEncoder(w).Encode(response)

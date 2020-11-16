@@ -10,9 +10,11 @@ type Country struct {
 }
 
 type City struct {
-	Id       string `json:"id"`
-	Name     string `json:"name"`
-	District string `json:"dsitrict"`
+	Id          string `json:"id"`
+	Name        string `json:"name"`
+	CountryCode string `json:"countryCode"`
+	District    string `json:"dsitrict"`
+	Info        string `json:"info"`
 }
 
 type Language struct {
@@ -20,6 +22,10 @@ type Language struct {
 	IsOfficial bool    `json:"isOfficial"`
 	Percentage float32 `json:"percentage"`
 }
+
+//type Info struct {
+//Population int `json:"Population"`
+/*}*/
 
 var (
 	country  = Country{}
