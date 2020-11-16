@@ -7,18 +7,31 @@ import (
 )
 
 type Country struct {
-	Code    string `json:"code"`
-	Name    string `json:"name"`
-	Capital string `json:"capital"`
-	Cities  []City `json:"cities"`
+	Code             string     `json:"code"`
+	Name             string     `json:"name"`
+	Capital          string     `json:"capital"`
+	OfficialLanguage string     `json:"officialLanguage"`
+	Cities           []City     `json:"cities"`
+	Languages        []Language `json:"languages"`
 }
 
 type City struct {
-	Id          string `json:"id"`
-	Name        string `json:"name"`
-	CountryCode string `json:"countryCode"`
-	District    string `json:"dsitrict"`
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	District string `json:"dsitrict"`
 }
+
+type Language struct {
+	Language   string  `json:"language"`
+	IsOfficial bool    `json:"isOfficial"`
+	Percentage float32 `json:"percentage"`
+}
+
+var (
+	country  = Country{}
+	city     = City{}
+	language = Language{}
+)
 
 // check error
 func errorCheck(err error) {
@@ -40,58 +53,79 @@ func initdb() *sql.DB {
 	return db
 }
 
-// read data country
-func Read() []Country {
-	db := initdb()
+func ReadCountryLanguages(code string, db *sql.DB) []Language {
+	languages := []Language{}
+	rowsLanguage, e := db.Query(`
+		SELECT
+			language,
+			isOfficial,
+			percentage
+		from 
+			countrylanguage
+		where CountryCode = ?
+	`, code)
+	errorCheck(e)
 
+	for rowsLanguage.Next() {
+		e = rowsLanguage.Scan(&language.Language, &language.IsOfficial, &language.Percentage)
+		errorCheck(e)
+		languages = append(languages, language)
+	}
+
+	return languages
+}
+
+func ReadCountryCities(code string, db *sql.DB) []City {
+	cities := []City{}
+	rowsCity, e := db.Query(`
+		SELECT
+			ID,
+			Name,
+			District
+		FROM
+			city
+		WHERE
+			CountryCode = ?
+	`, code)
+	errorCheck(e)
+
+	for rowsCity.Next() {
+		e = rowsCity.Scan(&city.Id, &city.Name, &city.District)
+		errorCheck(e)
+		cities = append(cities, city)
+	}
+
+	return cities
+
+}
+
+// read data country
+func ReadCountries() []Country {
+	db := initdb()
+	result := []Country{}
 	rowsCountry, e := db.Query(`
 			SELECT
-				country.code,
+				country.Code,
 				country.Name as name,
-				city.Name as capital
-			from
+				city.Name as capital,
+				countrylanguage.Language
+			FROM
 				country
-				left join city on city.id = country.Capital
-			where
-				country.name is not null
-			and
-				city.name is not null
+				LEFT JOIN city ON city.ID = country.Capital
+				RIGHT JOIN countrylanguage ON countrylanguage.CountryCode = country.Code
+			WHERE
+				country.Name IS NOT NULL
+			AND
+				city.Name IS NOT NULL
+			AND countrylanguage.IsOfficial 
 	`)
 	errorCheck(e)
 
-	var country = Country{}
-	var result []Country
-	var city = City{}
-	var cities []City
-
 	for rowsCountry.Next() {
-		e = rowsCountry.Scan(&country.Code, &country.Name, &country.Capital)
+		e = rowsCountry.Scan(&country.Code, &country.Name, &country.Capital, &country.OfficialLanguage)
 		errorCheck(e)
-
-		city = City{}
-
-		cities = []City{}
-		rowsCity, e := db.Query(`
-			SELECT
-				id,
-				name,
-				CountryCode,
-				district
-			from
-				city
-			where
-				CountryCode = ?
-		`, country.Code)
-		errorCheck(e)
-
-		for rowsCity.Next() {
-			e = rowsCity.Scan(&city.Id, &city.Name, &city.CountryCode, &city.District)
-			errorCheck(e)
-			cities = append(cities, city)
-		}
-
-		country.Cities = cities
-
+		country.Cities = ReadCountryCities(country.Code, db)
+		country.Languages = ReadCountryLanguages(country.Code, db)
 		result = append(result, country)
 	}
 	return result
